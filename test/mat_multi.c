@@ -122,11 +122,11 @@ void kji(const int *A, const int *B, int *C, const int n)
 void bijk(const int *A, const int *B, int *C, const int n, const int b)
 {
     int i, j, k;
-    for (i = 0; i < n; i++)
+    for (i = 0; i < n; i += b)
     {
-        for (j = 0; j < n; j++)
+        for (j = 0; j < n; j += b)
         {
-            for (k = 0; k < n; k++)
+            for (k = 0; k < n; k += b)
             {
                 int i1, j1, k1;
                 for (i1 = i; i1 < i + b; i1++)
@@ -144,6 +144,7 @@ void bijk(const int *A, const int *B, int *C, const int n, const int b)
             }
         }
     }
+
     print(C, 4);
 }
 
