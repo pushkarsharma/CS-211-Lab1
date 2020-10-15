@@ -84,6 +84,59 @@ void dgemm2(const double *A, const double *B, double *C, const int n)
 //Register Reuse part 3
 void dgemm3(const double *A, const double *B, double *C, const int n)
 {
+int i, j, k, l;
+    for(i = 0; i < n; i += 3){
+       for(j = 0; j < n; j += 3)  {
+            register double c00 = C[i*n+j]; 
+            register double c01 = C[i*n+(j+1)]; 
+            register double c02 = C[i*n+(j+2)];  
+
+            register double c10 = C[(i+1)*n+j]; 
+            register double c11 = C[(i+1)*n+(j+1)];
+            register double c12 = C[(i+1)*n+(j+2)];
+
+            register double c20 = C[(i+2)*n+j]; 
+            register double c21 = C[(i+2)*n+(j+1)];
+            register double c22 = C[(i+2)*n+(j+2)];
+
+            for(k = 0; k < n; k += 3) {
+              for (l = 0; l < 3; l++)
+              {
+                  register double a_0l = A[i*n + k+l];
+                  register double a_1l = A[(i+1)*n + k+l];
+                  register double a_2l = A[(i+2)*n + k+l];
+
+                  register double b_l0 = B[(k+l)*n + j]; 
+                  register double b_l1 = B[(k+l)*n + j+1];
+                  register double b_l2 = B[(k+l)*n + j+2];
+
+                  c00 += a_0l * b_l0;
+                  c01 += a_0l * b_l1;
+                  c02 += a_0l * b_l2;
+                  
+                  c10 += a_1l * b_l0;
+                  c11 += a_1l * b_l1;
+                  c12 += a_1l * b_l2;
+
+                  c20 += a_2l * b_l0;
+                  c21 += a_2l * b_l1;
+                  c22 += a_2l * b_l2;
+              }
+            }
+
+            C[i*n+j] = c00;
+            C[i*n+(j+1)] = c01; 
+            C[i*n+(j+2)] = c02;  
+
+            C[(i+1)*n+j] = c10; 
+            C[(i+1)*n+(j+1)] = c11;
+            C[(i+1)*n+(j+2)] = c12;
+
+            C[(i+2)*n+j] = c20; 
+            C[(i+2)*n+(j+1)] = c21;
+            C[(i+2)*n+(j+2)] = c22;
+        }
+    }
 }
 //Register Reuse part 3 End
 
