@@ -85,7 +85,7 @@ void bijk(const double *A, const double *B, double *C, const int n, const int b)
                 {
                     for (j1 = j; j1 < j + b; j1++)
                     {
-                        register int r = C[i1 * n + j1];
+                        register double r = C[i1 * n + j1];
                         for (k1 = k; k1 < k + b; k1++)
                         {
                             r += A[i1 * n + k1] * B[k1 * n + j1];
@@ -117,18 +117,17 @@ void jik(const double *A, const double *B, double *C, const int n)
 
 void bjik(const double *A, const double *B, double *C, const int n, const int b)
 {
-    /*
     int i, j, k;
-    for (j = 0; i < n; i++)
+    for (j = 0; j < n; j += b)
     {
-        for (i = 0; j < n; j++)
+        for (i = 0; i < n; i += b)
         {
-            for (k = 0; k < n; k++)
+            for (k = 0; k < n; k += b)
             {
                 int i1, j1, k1;
                 for (j1 = j; j1 < j + b; j1++)
                 {
-                    for (i1 = j; i1 < i + b; i1++)
+                    for (i1 = i; i1 < i + b; i1++)
                     {
                         register double r = C[i1 * n + j1];
                         for (k1 = k; k1 < k + b; k1++)
@@ -141,7 +140,6 @@ void bjik(const double *A, const double *B, double *C, const int n, const int b)
             }
         }
     }
-*/
 }
 
 void kij(const double *A, const double *B, double *C, const int n)

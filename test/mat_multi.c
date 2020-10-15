@@ -148,6 +148,34 @@ void bijk(const int *A, const int *B, int *C, const int n, const int b)
     print(C, 4);
 }
 
+void bjik(const int *A, const int *B, int *C, const int n, const int b)
+{
+    int i, j, k;
+    for (j = 0; j < n; j += b)
+    {
+        for (i = 0; i < n; i += b)
+        {
+            for (k = 0; k < n; k += b)
+            {
+                int i1, j1, k1;
+                for (j1 = j; j1 < j + b; j1++)
+                {
+                    for (i1 = i; i1 < i + b; i1++)
+                    {
+                        register int r = C[i1 * n + j1];
+                        for (k1 = k; k1 < k + b; k1++)
+                        {
+                            r += A[i1 * n + k1] * B[k1 * n + j1];
+                        }
+                        C[i1 * n + j1] = r;
+                    }
+                }
+            }
+        }
+    }
+    print(C, 4);
+}
+
 int main()
 {
     int A[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
@@ -173,7 +201,7 @@ int main()
     // jki(A, B, G, 4);
     // kji(A, B, H, 4);
 
-    bijk(A, B, D, 4, 2);
+    bjik(A, B, D, 4, 2);
 
     // bool all = true;
     // int pos;
