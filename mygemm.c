@@ -44,6 +44,40 @@ void dgemm1(const double *A, const double *B, double *C, const int n)
 //Register Reuse part 2
 void dgemm2(const double *A, const double *B, double *C, const int n)
 {
+    int i, j, k;
+
+    for (i = 0; i < n; i += 2)
+    {
+        for (j = 0; j < n; j += 2)
+        {
+            register double C_00 = C[i * n + j];
+            register double C_01 = C[i * n + (j + 1)];
+            register double C_10 = C[(i + 1) * n + j];
+            register double C_11 = C[(i + 1) * n + (j + 1)];
+
+            for (k = 0; k < n; k += 2)
+            {
+                register double A_00 = A[i * n + k];
+                register double A_01 = A[i * n + (k + 1)];
+                register double A_10 = A[(i + 1) * n + k];
+                register double A_11 = A[(i + 1) * n + (k + 1)];
+
+                register double B_00 = B[k * n + j];
+                register double B_01 = B[k * n + (j + 1)];
+                register double B_10 = B[(k + 1) * n + j];
+                register double B_11 = B[(k + 1) * n + (j + 1)];
+
+                C_00 += A_00 * B_00 + A_01 * B_10;
+                C_01 += A_00 * B_01 + A_01 * B_11;
+                C_10 += A_10 * B_00 + A_11 * B_10;
+                C_11 += A_10 * B_01 + A_11 * B_11;
+            }
+            C[i * n + j] = C_00;
+            C[i * n + (j + 1)] = C_01;
+            C[(i + 1) * n + j] = C_10;
+            C[(i + 1) * n + (j + 1)] = C_11;
+        }
+    }
 }
 //Register Reuse part 2 End
 
