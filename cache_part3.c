@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
                                "bijk", "bjik", "bkij", "bikj", "bjki", "bkji"};
     int matrix_dim = 2050;
     int block_size_arr[] = {10, 25, 41, 50, 82, 205};
-    int i;
+    int block_pos;
 
     int block_size = block_size_arr[i];
     int method_nums = sizeof(func_name_cache) / sizeof(func_name_cache[0]);
@@ -52,12 +52,12 @@ int main(int argc, char *argv[])
             return -1;
     }
 
-    for (i = 0; i < 6; i++)
+    for (block_pos = 0; block_pos < 6; block_pos++)
     {
-        printf("-----------Block Size %d-----------", block_size_arr[i]);
+        printf("-----------Block Size %d-----------", block_size_arr[block_pos]);
         for (i = 0; i < method_nums; i++)
         {
-            time_measurement_block(algorithm_ptr[i], func_name_cache[i], A, B, C[i], matrix_dim, block_size_arr[i], &result[i * 2]);
+            time_measurement_block(algorithm_ptr[i], func_name_cache[i], A, B, C[i], matrix_dim, block_size_arr[block_pos], &result[i * 2]);
             t0 = get_sec();
             cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, matrix_dim, matrix_dim, matrix_dim, 1., A, matrix_dim, B, matrix_dim, 1., C_verify[i], matrix_dim);
             t1 = get_sec();
