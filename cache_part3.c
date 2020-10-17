@@ -42,19 +42,19 @@ int main(int argc, char *argv[])
         return -1;
     double *C[method_nums];
     double *C_verify[method_nums];
-    for (i = 0; i < method_nums; i++)
-    {
-        C[i] = (double *)malloc(sizeof(double) * matrix_dim * matrix_dim);
-        C_verify[i] = (double *)malloc(sizeof(double) * matrix_dim * matrix_dim);
-        if (randomize_matrix(C[i], matrix_dim, matrix_dim))
-            return -1;
-        if (matrix_copy(C_verify[i], C[i], matrix_dim, matrix_dim))
-            return -1;
-    }
-
     for (block_pos = 0; block_pos < 6; block_pos++)
     {
         printf("-----------Block Size %d-----------", block_size_arr[block_pos]);
+        for (i = 0; i < method_nums; i++)
+        {
+            C[i] = (double *)malloc(sizeof(double) * matrix_dim * matrix_dim);
+            C_verify[i] = (double *)malloc(sizeof(double) * matrix_dim * matrix_dim);
+            if (randomize_matrix(C[i], matrix_dim, matrix_dim))
+                return -1;
+            if (matrix_copy(C_verify[i], C[i], matrix_dim, matrix_dim))
+                return -1;
+        }
+
         for (i = 0; i < method_nums; i++)
         {
             time_measurement_block(algorithm_ptr[i], func_name_cache[i], A, B, C[i], matrix_dim, block_size_arr[block_pos], &result[i * 2]);
@@ -67,21 +67,25 @@ int main(int argc, char *argv[])
                 printf("error detected at function %s, matrix size = %d.\n", func_name_cache[i], matrix_dim);
             }
         }
-
-        free(A);
-        free(B);
         for (i = 0; i < method_nums; i++)
         {
             free(C[i]);
             free(C_verify[i]);
         }
-
-        for (i = 0; i < method_nums; i++)
-        {
-            printf("%s: elapsed time is %8.5f second(s).\n", func_name_cache[i], result[2 * i]);
-        }
-
-        free(result);
     }
+    free(A);
+    free(B);
+    // for (i = 0; i < method_nums; i++)
+    // {
+    //     free(C[i]);
+    //     free(C_verify[i]);
+    // }
+
+    for (i = 0; i < method_nums; i++)
+    {
+        printf("%s: elapsed time is %8.5f second(s).\n", func_name_cache[i], result[2 * i]);
+    }
+
+    free(result);
     return 0;
 }
