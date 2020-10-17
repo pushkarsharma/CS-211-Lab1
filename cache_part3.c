@@ -28,7 +28,6 @@ int main(int argc, char *argv[])
     int block_size_arr[] = {10, 25, 41, 50, 82, 205};
     int block_pos;
 
-    int block_size = block_size_arr[i];
     int method_nums = sizeof(func_name_cache) / sizeof(func_name_cache[0]);
     double t0, t1;
     double *result = (double *)malloc(sizeof(double) * method_nums * 2);
@@ -72,19 +71,13 @@ int main(int argc, char *argv[])
             free(C[i]);
             free(C_verify[i]);
         }
+        for (i = 0; i < method_nums; i++)
+        {
+            printf("%s: elapsed time is %8.5f second(s).\n", func_name_cache[i], result[2 * i]);
+        }
     }
     free(A);
     free(B);
-    // for (i = 0; i < method_nums; i++)
-    // {
-    //     free(C[i]);
-    //     free(C_verify[i]);
-    // }
-
-    for (i = 0; i < method_nums; i++)
-    {
-        printf("%s: elapsed time is %8.5f second(s).\n", func_name_cache[i], result[2 * i]);
-    }
 
     free(result);
     return 0;
