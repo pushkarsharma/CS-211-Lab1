@@ -1,10 +1,10 @@
 #include "../include/for_you_to_do.h"
 
-int get_block_size(){
-    //return the block size you'd like to use 
+int get_block_size()
+{
+    //return the block size you'd like to use
     /*add your code here */
     return 128;
-  
 }
 
 /**
@@ -25,11 +25,52 @@ int get_block_size(){
  * 
  **/
 
-
-int mydgetrf(double *A, int *ipiv, int n) 
+int mydgetrf(double *A, int *ipiv, int n)
 {
     /* add your code here */
 
+    int i, j, k;
+    double *tempv = (double *)malloc(n * sizeof(double));
+    for (i = 0; i < n - 1; i++)
+    {
+        int maxind = i;
+        int max = fabs(A[i * n + i]);
+        int t;
+        for (t = i + 1; t < n; t++)
+        {
+            if (fabs(A[t * n + i]) > max)
+            {
+                maxind = t;
+                max = fabs(A[t * n + i]);
+            }
+        }
+        if (max == 0)
+        {
+            printf("LUfactoration failed: coefficient matrix is singular");
+            return;
+        }
+        else
+        {
+            if (maxind != i)
+            {
+                int temps = ipiv[i];
+                ipiv[i] = ipiv(maxind);
+                ipiv[maxind] = temps;
+                memcpy(tempv, A + i * n, n * sizeof(double));
+                memcpy(A + i * n, A + maxind * n, n * sizeof(double));
+                memcpy(A + maxind * n, tempv, n * sizeof(double));
+            }
+        }
+        for (j = i + 1 j < n; j++)
+        {
+            A[j * n + i] = A[j * n + i] / A[i * n + i];
+            for (k = i + 1, k < n; k++)
+            {
+                A[j * n + k] = A[j * n + k] - A[j * n + i] * A[i * n + k];
+            }
+        }
+    }
+    free(tempv);
     return 0;
 }
 
@@ -63,7 +104,38 @@ int mydgetrf(double *A, int *ipiv, int n)
 void mydtrsv(char UPLO, double *A, double *B, int n, int *ipiv)
 {
     /* add your code here */
-    return;
+    double *y = (double *)malloc(n * sizeof(double));
+    int i, j;
+    double sum;
+    if (UPLO == 'L')
+    {
+        y[0] = B[PVT[0]];
+        for (i = 1; i < n; i++)
+        {
+            sum = 0.0;
+            for (j = 0; j < i; j++)
+            {
+                sum += y[j] * A[i * n + j];
+            }
+            y[i] = B[PVT[i]] - sum;
+        }
+    }
+    else if (UPLO == 'U')
+    {
+        y[n - 1] = B[n - 1] / A[(n - 1) * n + n - 1];
+        for (i = n - 2; i >= 0; i--)
+        {
+            sum = 0;
+            for (j = i + 1; j < n; j++)
+            {
+                sum += y[j] * A[i * n + j];
+            }
+            y[i] = (B[i] - sum) / A[i * n + i];
+        }
+    }
+
+    memcpy(B, y, sizeof(double) * n);
+    free(y);
 }
 
 /**
@@ -75,6 +147,62 @@ void mydgemm(double *A, double *B, double *C, int n, int i, int j, int k, int b)
 {
     /* add your code here */
     /* please just copy from your lab1 function optimal( ... ) */
+    int l;
+    for (i = 0; i < n; i += 3)
+    {
+        for (j = 0; j < n; j += 3)
+        {
+            register double c_00 = C[i * n + j];
+            register double c_01 = C[i * n + (j + 1)];
+            register double c_02 = C[i * n + (j + 2)];
+
+            register double c_10 = C[(i + 1) * n + j];
+            register double c_11 = C[(i + 1) * n + (j + 1)];
+            register double c_12 = C[(i + 1) * n + (j + 2)];
+
+            register double c_20 = C[(i + 2) * n + j];
+            register double c_21 = C[(i + 2) * n + (j + 1)];
+            register double c_22 = C[(i + 2) * n + (j + 2)];
+
+            for (k = 0; k < n; k += 3)
+            {
+                for (l = 0; l < 3; l++)
+                {
+                    register double a_0l = A[i * n + k + l];
+                    register double a_1l = A[(i + 1) * n + k + l];
+                    register double a_2l = A[(i + 2) * n + k + l];
+
+                    register double b_l0 = B[(k + l) * n + j];
+                    register double b_l1 = B[(k + l) * n + j + 1];
+                    register double b_l2 = B[(k + l) * n + j + 2];
+
+                    c_00 += a_0l * b_l0;
+                    c_01 += a_0l * b_l1;
+                    c_02 += a_0l * b_l2;
+
+                    c_10 += a_1l * b_l0;
+                    c_11 += a_1l * b_l1;
+                    c_12 += a_1l * b_l2;
+
+                    c_20 += a_2l * b_l0;
+                    c_21 += a_2l * b_l1;
+                    c_22 += a_2l * b_l2;
+                }
+            }
+
+            C[i * n + j] = c_00;
+            C[i * n + (j + 1)] = c_01;
+            C[i * n + (j + 2)] = c_02;
+
+            C[(i + 1) * n + j] = c_10;
+            C[(i + 1) * n + (j + 1)] = c_11;
+            C[(i + 1) * n + (j + 2)] = c_12;
+
+            C[(i + 2) * n + j] = c_20;
+            C[(i + 2) * n + (j + 1)] = c_21;
+            C[(i + 2) * n + (j + 2)] = c_22;
+        }
+    }
     return;
 }
 
@@ -106,8 +234,7 @@ void mydgemm(double *A, double *B, double *C, int n, int i, int j, int k, int b)
  *      return  0 : return normally 
  * 
  **/
-int mydgetrf_block(double *A, int *ipiv, int n, int b) 
+int mydgetrf_block(double *A, int *ipiv, int n, int b)
 {
     return 0;
 }
-
