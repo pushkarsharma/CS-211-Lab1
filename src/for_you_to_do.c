@@ -54,17 +54,17 @@ int mydgetrf(double *A, int *ipiv, int n)
             if (maxind != i)
             {
                 int temps = ipiv[i];
-                ipiv[i] = ipiv(maxind);
+                ipiv[i] = ipiv[maxind];
                 ipiv[maxind] = temps;
                 memcpy(tempv, A + i * n, n * sizeof(double));
                 memcpy(A + i * n, A + maxind * n, n * sizeof(double));
                 memcpy(A + maxind * n, tempv, n * sizeof(double));
             }
         }
-        for (j = i + 1 j < n; j++)
+        for (j = i + 1; j < n; j++)
         {
             A[j * n + i] = A[j * n + i] / A[i * n + i];
-            for (k = i + 1, k < n; k++)
+            for (k = i + 1; k < n; k++)
             {
                 A[j * n + k] = A[j * n + k] - A[j * n + i] * A[i * n + k];
             }
@@ -109,7 +109,7 @@ void mydtrsv(char UPLO, double *A, double *B, int n, int *ipiv)
     double sum;
     if (UPLO == 'L')
     {
-        y[0] = B[PVT[0]];
+        y[0] = B[ipiv[0]];
         for (i = 1; i < n; i++)
         {
             sum = 0.0;
@@ -117,7 +117,7 @@ void mydtrsv(char UPLO, double *A, double *B, int n, int *ipiv)
             {
                 sum += y[j] * A[i * n + j];
             }
-            y[i] = B[PVT[i]] - sum;
+            y[i] = B[ipiv[i]] - sum;
         }
     }
     else if (UPLO == 'U')
