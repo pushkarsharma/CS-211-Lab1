@@ -28,49 +28,56 @@ int get_block_size()
 int mydgetrf(double *A, int *ipiv, int n)
 {
     /* add your code here */
-
-    int i, j, k;
-    double *tempv = (double *)malloc(n * sizeof(double));
-    for (i = 0; i < n - 1; i++)
+   int i, maxIndex;
+    double max;
+    double *temprow = (double*) malloc(sizeof(double) * n);
+    for (i = 0; i < n; i++)
     {
-        int maxind = i;
-        int max = fabs(A[i * n + i]);
-        int t;
-        for (t = i + 1; t < n; t++)
+        // pivoting
+        maxIndex = i;
+        max = fabs(A[i*n + i]);
+        
+        int j;
+        for (j = i+1; j < n; j++)
         {
-            if (fabs(A[t * n + i]) > max)
+            if (fabs(A[j*n + i]) > max)
             {
-                maxind = t;
-                max = fabs(A[t * n + i]);
+                maxIndex = j;
+                max = fabs(A[j*n + i]);
             }
         }
         if (max == 0)
         {
-            printf("LUfactoration failed: coefficient matrix is singular");
-            return;
+            printf("LU factorization failed: coefficient matrix is singular.\n");
+            return -1;
         }
         else
         {
-            if (maxind != i)
+            if (maxIndex != i)
             {
-                int temps = ipiv[i];
-                ipiv[i] = ipiv[maxind];
-                ipiv[maxind] = temps;
-                memcpy(tempv, A + i * n, n * sizeof(double));
-                memcpy(A + i * n, A + maxind * n, n * sizeof(double));
-                memcpy(A + maxind * n, tempv, n * sizeof(double));
+                // save pivoting information
+                int temp = ipiv[i];
+                ipiv[i] = ipiv[maxIndex];
+                ipiv[maxIndex] = temp;
+                // swap rows
+                memcpy(temprow, A + i*n, n * sizeof(double));
+                memcpy(A + i*n, A + maxIndex*n, n * sizeof(double));
+                memcpy(A + maxIndex*n, temprow, n * sizeof(double));
             }
         }
-        for (j = i + 1; j < n; j++)
+
+        // factorization
+        for (j = i+1; j < n; j++)
         {
-            A[j * n + i] = A[j * n + i] / A[i * n + i];
-            for (k = i + 1; k < n; k++)
+            A[j*n + i] = A[j*n + i] / A[i*n + i];
+            int k;
+            for (k = i+1; k < n; k++)
             {
-                A[j * n + k] = A[j * n + k] - A[j * n + i] * A[i * n + k];
+                A[j*n + k] -= A[j*n +i] * A[i*n + k];
             }
         }
     }
-    free(tempv);
+    free(temprow);
     return 0;
 }
 
