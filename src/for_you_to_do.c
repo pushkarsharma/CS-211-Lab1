@@ -28,22 +28,20 @@ int get_block_size()
 int mydgetrf(double *A, int *ipiv, int n)
 {
     /* add your code here */
-   int i, maxIndex;
-    double max;
-    double *temprow = (double*) malloc(sizeof(double) * n);
+    int i;
+    double *tempv = (double *)malloc(sizeof(double) * n);
     for (i = 0; i < n; i++)
     {
-        // pivoting
-        maxIndex = i;
-        max = fabs(A[i*n + i]);
-        
-        int j;
-        for (j = i+1; j < n; j++)
+        int maxIndex = i;
+        int max = fabs(A[i * n + i]);
+
+        int t;
+        for (t = i + 1; t < n; t++)
         {
-            if (fabs(A[j*n + i]) > max)
+            if (fabs(A[t * n + i]) > max)
             {
-                maxIndex = j;
-                max = fabs(A[j*n + i]);
+                maxIndex = t;
+                max = fabs(A[t * n + i]);
             }
         }
         if (max == 0)
@@ -55,29 +53,28 @@ int mydgetrf(double *A, int *ipiv, int n)
         {
             if (maxIndex != i)
             {
-                // save pivoting information
                 int temp = ipiv[i];
                 ipiv[i] = ipiv[maxIndex];
                 ipiv[maxIndex] = temp;
-                // swap rows
-                memcpy(temprow, A + i*n, n * sizeof(double));
-                memcpy(A + i*n, A + maxIndex*n, n * sizeof(double));
-                memcpy(A + maxIndex*n, temprow, n * sizeof(double));
+                
+                memcpy(tempv, A + i * n, n * sizeof(double));
+                memcpy(A + i * n, A + maxIndex * n, n * sizeof(double));
+                memcpy(A + maxIndex * n, tempv, n * sizeof(double));
             }
         }
 
-        // factorization
-        for (j = i+1; j < n; j++)
+        int j;
+        for (j = i + 1; j < n; j++)
         {
-            A[j*n + i] = A[j*n + i] / A[i*n + i];
+            A[j * n + i] = A[j * n + i] / A[i * n + i];
             int k;
-            for (k = i+1; k < n; k++)
+            for (k = i + 1; k < n; k++)
             {
-                A[j*n + k] -= A[j*n +i] * A[i*n + k];
+                A[j * n + k] -= A[j * n + i] * A[i * n + k];
             }
         }
     }
-    free(temprow);
+    free(tempv);
     return 0;
 }
 
