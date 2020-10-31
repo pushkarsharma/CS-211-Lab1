@@ -28,20 +28,21 @@ int get_block_size()
 int mydgetrf(double *A, int *ipiv, int n)
 {
     /* add your code here */
-    int i;
-    double *tempv = (double *)malloc(sizeof(double) * n);
+   int i, maxIndex;
+    double max;
+    double *tempv = (double*) malloc(sizeof(double) * n);
     for (i = 0; i < n; i++)
     {
-        int maxIndex = i;
-        int max = fabs(A[i * n + i]);
-
+        maxIndex = i;
+        max = fabs(A[i*n + i]);
+        
         int t;
-        for (t = i + 1; t < n; t++)
+        for (t = i+1; t < n; t++)
         {
-            if (fabs(A[t * n + i]) > max)
+            if (fabs(A[t*n + i]) > max)
             {
                 maxIndex = t;
-                max = fabs(A[t * n + i]);
+                max = fabs(A[t*n + i]);
             }
         }
         if (max == 0)
@@ -56,21 +57,19 @@ int mydgetrf(double *A, int *ipiv, int n)
                 int temp = ipiv[i];
                 ipiv[i] = ipiv[maxIndex];
                 ipiv[maxIndex] = temp;
-                
-                memcpy(tempv, A + i * n, n * sizeof(double));
-                memcpy(A + i * n, A + maxIndex * n, n * sizeof(double));
-                memcpy(A + maxIndex * n, tempv, n * sizeof(double));
+                memcpy(tempv, A + i*n, n * sizeof(double));
+                memcpy(A + i*n, A + maxIndex*n, n * sizeof(double));
+                memcpy(A + maxIndex*n, tempv, n * sizeof(double));
             }
         }
 
-        int j;
-        for (j = i + 1; j < n; j++)
+        for (t = i+1; t < n; t++)
         {
-            A[j * n + i] = A[j * n + i] / A[i * n + i];
+            A[t*n + i] = A[t*n + i] / A[i*n + i];
             int k;
-            for (k = i + 1; k < n; k++)
+            for (k = i+1; k < n; k++)
             {
-                A[j * n + k] -= A[j * n + i] * A[i * n + k];
+                A[t*n + k] -= A[t*n +i] * A[i*n + k];
             }
         }
     }
