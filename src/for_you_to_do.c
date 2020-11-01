@@ -151,33 +151,33 @@ void mydgemm(double *A, double *B, double *C, int n, int i, int j, int k, int b)
     /* add your code here */
     /* please just copy from your lab1 function optimal( ... ) */
     int l;
-    for (i = 0; i < n; i += 3)
+    for (new_i= i; new_i< n; new_i+= 3)
     {
-        for (j = 0; j < n; j += 3)
+        for (new_j = j; new_j < n; new_j += 3)
         {
-            register double c_00 = C[i * n + j];
-            register double c_01 = C[i * n + (j + 1)];
-            register double c_02 = C[i * n + (j + 2)];
+            register double c_00 = C[new_i* n + new_j];
+            register double c_01 = C[new_i* n + (new_j + 1)];
+            register double c_02 = C[new_i* n + (new_j + 2)];
 
-            register double c_10 = C[(i + 1) * n + j];
-            register double c_11 = C[(i + 1) * n + (j + 1)];
-            register double c_12 = C[(i + 1) * n + (j + 2)];
+            register double c_10 = C[(new_i+ 1) * n + new_j];
+            register double c_11 = C[(new_i+ 1) * n + (new_j + 1)];
+            register double c_12 = C[(new_i+ 1) * n + (new_j + 2)];
 
-            register double c_20 = C[(i + 2) * n + j];
-            register double c_21 = C[(i + 2) * n + (j + 1)];
-            register double c_22 = C[(i + 2) * n + (j + 2)];
+            register double c_20 = C[(new_i+ 2) * n + new_j];
+            register double c_21 = C[(new_i+ 2) * n + (new_j + 1)];
+            register double c_22 = C[(new_i+ 2) * n + (new_j + 2)];
 
-            for (k = 0; k < n; k += 3)
+            for (new_k = k; new_k < n; new_k += 3)
             {
                 for (l = 0; l < 3; l++)
                 {
-                    register double a_0l = A[i * n + k + l];
-                    register double a_1l = A[(i + 1) * n + k + l];
-                    register double a_2l = A[(i + 2) * n + k + l];
+                    register double a_0l = A[new_i* n + new_k + l];
+                    register double a_1l = A[(new_i+ 1) * n + new_k + l];
+                    register double a_2l = A[(new_i+ 2) * n + new_k + l];
 
-                    register double b_l0 = B[(k + l) * n + j];
-                    register double b_l1 = B[(k + l) * n + j + 1];
-                    register double b_l2 = B[(k + l) * n + j + 2];
+                    register double b_l0 = B[(new_k + l) * n + new_j];
+                    register double b_l1 = B[(new_k + l) * n + new_j + 1];
+                    register double b_l2 = B[(new_k + l) * n + new_j + 2];
 
                     c_00 += a_0l * b_l0;
                     c_01 += a_0l * b_l1;
@@ -193,17 +193,17 @@ void mydgemm(double *A, double *B, double *C, int n, int i, int j, int k, int b)
                 }
             }
 
-            C[i * n + j] = c_00;
-            C[i * n + (j + 1)] = c_01;
-            C[i * n + (j + 2)] = c_02;
+            C[new_i* n + new_j] = c_00;
+            C[new_i* n + (new_j + 1)] = c_01;
+            C[new_i* n + (new_j + 2)] = c_02;
 
-            C[(i + 1) * n + j] = c_10;
-            C[(i + 1) * n + (j + 1)] = c_11;
-            C[(i + 1) * n + (j + 2)] = c_12;
+            C[(new_i+ 1) * n + new_j] = c_10;
+            C[(new_i+ 1) * n + (new_j + 1)] = c_11;
+            C[(new_i+ 1) * n + (new_j + 2)] = c_12;
 
-            C[(i + 2) * n + j] = c_20;
-            C[(i + 2) * n + (j + 1)] = c_21;
-            C[(i + 2) * n + (j + 2)] = c_22;
+            C[(new_i+ 2) * n + new_j] = c_20;
+            C[(new_i+ 2) * n + (new_j + 1)] = c_21;
+            C[(new_i+ 2) * n + (new_j + 2)] = c_22;
         }
     }
 }
@@ -305,7 +305,7 @@ int mydgetrf_block(double *A, int *ipiv, int n, int b)
         {
             for (j = ib+b; j < n; j += b)
             {
-                dgemm3_cache_mod(A, A, A, n, i, j, ib, b);
+                mydgemm(A, A, A, n, i, j, ib, b);
             }
         }
     }
