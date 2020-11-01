@@ -150,62 +150,60 @@ void mydgemm(double *A, double *B, double *C, int n, int i, int j, int k, int b)
 {
     /* add your code here */
     /* please just copy from your lab1 function optimal( ... ) */
-    int i1, j1, k1, l;
-    for (i1 = i; i1 < (i + b > n ? n : (i + b)); i1 += 3)
+    int local_i, local_j, local_k, l;
+    for (local_i = i; local_i < n; local_i += 3)
     {
-        for (j1 = j; j1 < (j + b > n ? n : (j + b)); j1 += 3)
+        for (local_j = j; local_j < n; local_j += 3)
         {
-            register double c00 = C[i1 * n + j1];
-            register double c01 = C[i1 * n + (j1 + 1)];
-            register double c02 = C[i1 * n + (j1 + 2)];
+            register double c_00 = C[local_i * n + local_j];
+            register double c_01 = C[local_i * n + (local_j + 1)];
+            register double c_02 = C[local_i * n + (local_j + 2)];
 
-            register double c10 = C[(i1 + 1) * n + j1];
-            register double c11 = C[(i1 + 1) * n + (j1 + 1)];
-            register double c12 = C[(i1 + 1) * n + (j1 + 2)];
+            register double c_10 = C[(local_i + 1) * n + local_j];
+            register double c_11 = C[(local_i + 1) * n + (local_j + 1)];
+            register double c_12 = C[(local_i + 1) * n + (local_j + 2)];
 
-            register double c20 = C[(i1 + 2) * n + j1];
-            register double c21 = C[(i1 + 2) * n + (j1 + 1)];
-            register double c22 = C[(i1 + 2) * n + (j1 + 2)];
+            register double c_20 = C[(local_i + 2) * n + local_j];
+            register double c_21 = C[(local_i + 2) * n + (local_j + 1)];
+            register double c_22 = C[(local_i + 2) * n + (local_j + 2)];
 
-            for (k1 = k; k1 < ((k + b) > n ? n : (k + b)); k1 += 3)
+            for (local_k = k; local_k < n; local_k += 3)
             {
                 for (l = 0; l < 3; l++)
                 {
-                    //accessing A column wise
-                    register double a_0l = A[i1 * n + k1 + l];       //row1
-                    register double a_1l = A[(i1 + 1) * n + k1 + l]; //row2
-                    register double a_2l = A[(i1 + 2) * n + k1 + l]; //row3
+                    register double a_0l = A[local_i * n + local_k + l];
+                    register double a_1l = A[(local_i + 1) * n + local_k + l];
+                    register double a_2l = A[(local_i + 2) * n + local_k + l];
 
-                    //accessing B row wise
-                    register double b_l0 = B[(k1 + l) * n + j1];     //col1
-                    register double b_l1 = B[(k1 + l) * n + j1 + 1]; //col2
-                    register double b_l2 = B[(k1 + l) * n + j1 + 2]; //col3
+                    register double b_l0 = B[(local_k + l) * n + local_j];
+                    register double b_l1 = B[(local_k + l) * n + local_j + 1];
+                    register double b_l2 = B[(local_k + l) * n + local_j + 2];
 
-                    c00 -= a_0l * b_l0;
-                    c01 -= a_0l * b_l1;
-                    c02 -= a_0l * b_l2;
+                    c_00 += a_0l * b_l0;
+                    c_01 += a_0l * b_l1;
+                    c_02 += a_0l * b_l2;
 
-                    c10 -= a_1l * b_l0;
-                    c11 -= a_1l * b_l1;
-                    c12 -= a_1l * b_l2;
+                    c_10 += a_1l * b_l0;
+                    c_11 += a_1l * b_l1;
+                    c_12 += a_1l * b_l2;
 
-                    c20 -= a_2l * b_l0;
-                    c21 -= a_2l * b_l1;
-                    c22 -= a_2l * b_l2;
+                    c_20 += a_2l * b_l0;
+                    c_21 += a_2l * b_l1;
+                    c_22 += a_2l * b_l2;
                 }
             }
 
-            C[i1 * n + j1] = c00;
-            C[i1 * n + (j1 + 1)] = c01;
-            C[i1 * n + (j1 + 2)] = c02;
+            C[local_i * n + local_j] = c_00;
+            C[local_i * n + (local_j + 1)] = c_01;
+            C[local_i * n + (local_j + 2)] = c_02;
 
-            C[(i1 + 1) * n + j1] = c10;
-            C[(i1 + 1) * n + (j1 + 1)] = c11;
-            C[(i1 + 1) * n + (j1 + 2)] = c12;
+            C[(local_i + 1) * n + local_j] = c_10;
+            C[(local_i + 1) * n + (local_j + 1)] = c_11;
+            C[(local_i + 1) * n + (local_j + 2)] = c_12;
 
-            C[(i1 + 2) * n + j1] = c20;
-            C[(i1 + 2) * n + (j1 + 1)] = c21;
-            C[(i1 + 2) * n + (j1 + 2)] = c22;
+            C[(local_i + 2) * n + local_j] = c_20;
+            C[(local_i + 2) * n + (local_j + 1)] = c_21;
+            C[(local_i + 2) * n + (local_j + 2)] = c_22;
         }
     }
 }
