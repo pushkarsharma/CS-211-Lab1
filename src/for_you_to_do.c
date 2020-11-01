@@ -3,7 +3,8 @@
 int get_block_size()
 {
     //return the block size you'd like to use
-    /*add your code here */
+
+    /* Most optimal block size is 126 */
     return 126;
 }
 
@@ -27,12 +28,12 @@ int get_block_size()
 
 int mydgetrf(double *A, int *ipiv, int n)
 {
-    /* add your code here */
     int i, maxIndex;
     double max;
     double *tempv = (double *)malloc(sizeof(double) * n);
     for (i = 0; i < n; i++)
     {
+        /* Pivoting */
         maxIndex = i;
         max = fabs(A[i * n + i]);
 
@@ -52,17 +53,21 @@ int mydgetrf(double *A, int *ipiv, int n)
         }
         else
         {
+            /* Save Pivoting Information */
             if (maxIndex != i)
             {
+                /* Swapping values between ipiv current pivot index and max index. */
                 int temp = ipiv[i];
                 ipiv[i] = ipiv[maxIndex];
                 ipiv[maxIndex] = temp;
+                /* Swap Rows */
                 memcpy(tempv, A + i * n, n * sizeof(double));
                 memcpy(A + i * n, A + maxIndex * n, n * sizeof(double));
                 memcpy(A + maxIndex * n, tempv, n * sizeof(double));
             }
         }
 
+        /* Factorization */
         for (t = i + 1; t < n; t++)
         {
             A[t * n + i] = A[t * n + i] / A[i * n + i];
@@ -112,6 +117,7 @@ void mydtrsv(char UPLO, double *A, double *B, int n, int *ipiv)
     double sum;
     if (UPLO == 'L')
     {
+        /* Backward Substitution */
         y[0] = B[ipiv[0]];
         for (i = 1; i < n; i++)
         {
@@ -125,6 +131,7 @@ void mydtrsv(char UPLO, double *A, double *B, int n, int *ipiv)
     }
     else if (UPLO == 'U')
     {
+        /* Forward Substitution */
         y[n - 1] = B[n - 1] / A[(n - 1) * n + n - 1];
         for (i = n - 2; i >= 0; i--)
         {
@@ -148,8 +155,6 @@ void mydtrsv(char UPLO, double *A, double *B, int n, int *ipiv)
  **/
 void mydgemm(double *A, double *B, double *C, int n, int i, int j, int k, int b)
 {
-    /* add your code here */
-    /* please just copy from your lab1 function optimal( ... ) */
     int local_i, local_j, local_k, l;
     for (local_i = i; local_i < (i + b > n ? n : (i + b)); local_i += 3)
     {
@@ -177,9 +182,15 @@ void mydgemm(double *A, double *B, double *C, int n, int i, int j, int k, int b)
                     register double b_l1 = B[(local_k + l) * n + local_j + 1];
                     register double b_l2 = B[(local_k + l) * n + local_j + 2];
 
-                    c_00 -= a_0l * b_l0; c_01 -= a_0l * b_l1; c_02 -= a_0l * b_l2;
-                    c_10 -= a_1l * b_l0; c_11 -= a_1l * b_l1; c_12 -= a_1l * b_l2;
-                    c_20 -= a_2l * b_l0; c_21 -= a_2l * b_l1; c_22 -= a_2l * b_l2;
+                    c_00 -= a_0l * b_l0;
+                    c_01 -= a_0l * b_l1;
+                    c_02 -= a_0l * b_l2;
+                    c_10 -= a_1l * b_l0;
+                    c_11 -= a_1l * b_l1;
+                    c_12 -= a_1l * b_l2;
+                    c_20 -= a_2l * b_l0;
+                    c_21 -= a_2l * b_l1;
+                    c_22 -= a_2l * b_l2;
                 }
             }
 
