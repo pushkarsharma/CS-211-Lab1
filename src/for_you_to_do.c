@@ -238,5 +238,76 @@ void mydgemm(double *A, double *B, double *C, int n, int i, int j, int k, int b)
  **/
 int mydgetrf_block(double *A, int *ipiv, int n, int b)
 {
+    int ib, i, j, k, maxIndex;
+    double max, sum;
+    double *tempv = (double*) malloc(sizeof(double) * n);
+
+    for (ib = 0; ib < n; ib += b)
+    {
+        for (i = ib; i < ib+b && i < n; i++)
+        {
+            maxIndex = i;
+            max = fabs(A[i*n + i]);
+            
+            int j;
+            for (j = i+1; j < n; j++)
+            {
+                if (fabs(A[j*n + i]) > max)
+                {
+                    maxIndex = j;
+                    max = fabs(A[j*n + i]);
+                }
+            }
+            if (max == 0)
+            {
+                printf("LU factorization failed: coefficient matrix is singular.\n");
+                return -1;
+            }
+            else
+            {
+                if (maxIndex != i)
+                {
+                    int temp = ipiv[i];
+                    ipiv[i] = ipiv[maxIndex];
+                    ipiv[maxIndex] = temp;
+
+                    memcpy(tempv, A + i*n, n * sizeof(double));
+                    memcpy(A + i*n, A + maxIndex*n, n * sizeof(double));
+                    memcpy(A + maxIndex*n, tempv, n * sizeof(double));
+                }
+            }
+
+            for (j = i+1; j < n; j++)
+            {
+                A[j*n + i] = A[j*n + i] / A[i*n + i];
+                int k;
+                for (k = i+1; k < ib+b && k < n; k++)
+                {
+                    A[j*n + k] -= A[j*n +i] * A[i*n + k];
+                }
+            }
+        }
+
+        for (i = ib; i < ib+b && i < n; i++)
+        {
+            for (j = ib+b; j < n; j++)
+            {
+                sum = 0;
+                for (k = ib; k < i; k++)
+                {
+                    sum += A[i*n + k] * A[k*n + j];
+                }
+                A[i*n + j] -= sum;
+            }
+        }
+
+        for (i = ib+b; i < n; i += b)
+        {
+            for (j = ib+b; j < n; j += b)
+            {
+                dgemm3_cache_mod(A, A, A, n, i, j, ib, b);
+            }
+        }
+    }
     return 0;
 }
