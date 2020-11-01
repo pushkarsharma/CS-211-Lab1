@@ -151,23 +151,21 @@ void mydgemm(double *A, double *B, double *C, int n, int i, int j, int k, int b)
     /* add your code here */
     /* please just copy from your lab1 function optimal( ... ) */
     int local_i, local_j, local_k, l;
-    for (local_i = i; local_i < n; local_i += 3)
+    for (local_i = i; local_i < (i + b > n ? n : (i + b)); local_i += 3)
     {
-        for (local_j = j; local_j < n; local_j += 3)
+        for (local_j = j; local_j < (j + b > n ? n : (j + b)); local_j += 3)
         {
             register double c_00 = C[local_i * n + local_j];
             register double c_01 = C[local_i * n + (local_j + 1)];
             register double c_02 = C[local_i * n + (local_j + 2)];
-
             register double c_10 = C[(local_i + 1) * n + local_j];
             register double c_11 = C[(local_i + 1) * n + (local_j + 1)];
             register double c_12 = C[(local_i + 1) * n + (local_j + 2)];
-
             register double c_20 = C[(local_i + 2) * n + local_j];
             register double c_21 = C[(local_i + 2) * n + (local_j + 1)];
             register double c_22 = C[(local_i + 2) * n + (local_j + 2)];
 
-            for (local_k = k; local_k < n; local_k += 3)
+            for (local_k = k; local_k < ((k + b) > n ? n : (k + b)); local_k += 3)
             {
                 for (l = 0; l < 3; l++)
                 {
@@ -179,28 +177,18 @@ void mydgemm(double *A, double *B, double *C, int n, int i, int j, int k, int b)
                     register double b_l1 = B[(local_k + l) * n + local_j + 1];
                     register double b_l2 = B[(local_k + l) * n + local_j + 2];
 
-                    c_00 += a_0l * b_l0;
-                    c_01 += a_0l * b_l1;
-                    c_02 += a_0l * b_l2;
-
-                    c_10 += a_1l * b_l0;
-                    c_11 += a_1l * b_l1;
-                    c_12 += a_1l * b_l2;
-
-                    c_20 += a_2l * b_l0;
-                    c_21 += a_2l * b_l1;
-                    c_22 += a_2l * b_l2;
+                    c_00 -= a_0l * b_l0; c_01 -= a_0l * b_l1; c_02 -= a_0l * b_l2;
+                    c_10 -= a_1l * b_l0; c_11 -= a_1l * b_l1; c_12 -= a_1l * b_l2;
+                    c_20 -= a_2l * b_l0; c_21 -= a_2l * b_l1; c_22 -= a_2l * b_l2;
                 }
             }
 
             C[local_i * n + local_j] = c_00;
             C[local_i * n + (local_j + 1)] = c_01;
             C[local_i * n + (local_j + 2)] = c_02;
-
             C[(local_i + 1) * n + local_j] = c_10;
             C[(local_i + 1) * n + (local_j + 1)] = c_11;
             C[(local_i + 1) * n + (local_j + 2)] = c_12;
-
             C[(local_i + 2) * n + local_j] = c_20;
             C[(local_i + 2) * n + (local_j + 1)] = c_21;
             C[(local_i + 2) * n + (local_j + 2)] = c_22;
@@ -238,12 +226,12 @@ void mydgemm(double *A, double *B, double *C, int n, int i, int j, int k, int b)
  **/
 int mydgetrf_block(double *A, int *ipiv, int n, int b)
 {
-    int i, j, k, t, maxind, ib;
+    int i, j, k, t, maxind, i_block;
     double max;
     double *tempv = (double *)malloc(sizeof(double) * n);
-    for (ib = 0; ib < n; ib += b)
+    for (i_block = 0; i_block < n; i_block += b)
     {
-        for (i = ib; i < ib + b && i < n; i++)
+        for (i = i_block; i < i_block + b && i < n; i++)
         {
             maxind = i;
             max = fabs(A[i * n + i]);
@@ -259,7 +247,7 @@ int mydgetrf_block(double *A, int *ipiv, int n, int b)
 
             if (max == 0)
             {
-                printf("LUfactoration failed: coefficient matrix is singular\n");
+                printf("LUfactoration failed: coefficient matrix is singular!");
                 return -1;
             }
             else
@@ -278,28 +266,28 @@ int mydgetrf_block(double *A, int *ipiv, int n, int b)
                 for (j = i + 1; j < n; j++)
                 {
                     A[j * n + i] = A[j * n + i] / A[i * n + i];
-                    for (k = i + 1; k < ib + b && k < n; k++)
+                    for (k = i + 1; k < i_block + b && k < n; k++)
                         A[j * n + k] = A[j * n + k] - A[j * n + i] * A[i * n + k];
                 }
             }
         }
-        for (i = ib; i < ib + b && i < n; i++)
+        for (i = i_block; i < i_block + b && i < n; i++)
         {
-            for (j = ib + b; j < n; j++)
+            for (j = i_block + b; j < n; j++)
             {
                 double sum = 0.0;
-                for (k = ib; k < i; k++)
+                for (k = i_block; k < i; k++)
                 {
                     sum += A[i * n + k] * A[k * n + j];
                 }
                 A[i * n + j] -= sum;
             }
         }
-        for (i = ib + b; i < n; i += b)
+        for (i = i_block + b; i < n; i += b)
         {
-            for (j = ib + b; j < n; j += b)
+            for (j = i_block + b; j < n; j += b)
             {
-                mydgemm(A, A, A, n, i, j, ib, b);
+                mydgemm(A, A, A, n, i, j, i_block, b);
             }
         }
     }
