@@ -1,23 +1,42 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.7)
+project(lab3)
 
-project(cs211-lab1)
 
-include_directories(/act/opt/intel/mkl/include)
-link_directories(/act/opt/intel/mkl/lib/intel64)
-SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=/act/opt/intel/mkl/lib/intel64")
+find_package(MPI REQUIRED)
+include_directories(${MPI_INCLUDE_PATH})
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -W -DMKL_ILP64 -lmkl_avx2 -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl -m64")
-add_executable(reg_reuse reg_reuse.c util.c mygemm.c)
-add_executable(cache_part3 cache_part3.c util.c mygemm.c)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -lm")
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -W -DMKL_ILP64 -lmkl_avx2 -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl -m64")
-add_executable(cache_part4_o0 cache_part4.c util.c mygemm.c)
+add_executable(sieve0 sieve0.c)
+add_executable(sieve1 sieve1.c)
+add_executable(sieve2 sieve2.c)
+add_executable(sieve3 sieve3.c)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O1 -W -DMKL_ILP64 -lmkl_avx2 -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl -m64")
-add_executable(cache_part4_o1 cache_part4.c util.c mygemm.c)
+set(TARGET_LIST "sieve0 sieve1 sieve2 sieve3")
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -W -DMKL_ILP64 -lmkl_avx2 -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl -m64")
-add_executable(cache_part4_o2 cache_part4.c util.c mygemm.c)
+target_link_libraries(sieve0 ${MPI_LIBRARIES})
+target_link_libraries(sieve1 ${MPI_LIBRARIES})
+target_link_libraries(sieve2 ${MPI_LIBRARIES})
+target_link_libraries(sieve3 ${MPI_LIBRARIES})
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -W -DMKL_ILP64 -lmkl_avx2 -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl -m64")
-add_executable(cache_part4_o3 cache_part4.c util.c mygemm.c)
+if(MPI_COMPILE_FLAGS)
+  set_target_properties(sieve0 PROPERTIES
+    COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
+  set_target_properties(sieve1 PROPERTIES
+    COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
+  set_target_properties(sieve2 PROPERTIES
+    COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
+  set_target_properties(sieve3 PROPERTIES
+    COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
+endif()
+
+if(MPI_LINK_FLAGS)
+  set_target_properties(sieve0 PROPERTIES
+    LINK_FLAGS "${MPI_LINK_FLAGS}")
+  set_target_properties(sieve1 PROPERTIES
+    LINK_FLAGS "${MPI_LINK_FLAGS}")
+  set_target_properties(sieve2 PROPERTIES
+    LINK_FLAGS "${MPI_LINK_FLAGS}")
+  set_target_properties(sieve3 PROPERTIES
+    LINK_FLAGS "${MPI_LINK_FLAGS}")
+endif()
