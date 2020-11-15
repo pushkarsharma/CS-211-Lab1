@@ -121,9 +121,9 @@ int main(int argc, char *argv[])
 
 
 
-low_value = 2 + BLOCK_LOW(pid, psize, n-1);
-    high_value = 2 + BLOCK_HIGH(pid, psize, n-1);
-    // size = BLOCK_SIZE(pid, psize, n-1);
+low_value = 2 + BLOCK_LOW(id, p, n-1);
+    high_value = 2 + BLOCK_HIGH(id, p, n-1);
+    // size = BLOCK_SIZE(id, p, n-1);
     low_value = low_value + (low_value + 1) % 2;
     high_value = high_value - (high_value + 1) % 2;
     size = (high_value - low_value) / 2 + 1;
@@ -131,10 +131,10 @@ low_value = 2 + BLOCK_LOW(pid, psize, n-1);
     /**
      * process 0 must holds all primes used
      */
-    proc0_size = (n/2 - 1) / psize;
+    proc0_size = (n/2 - 1) / p;
     if ((2 + proc0_size) < (int) sqrt((double) n/2))
     {
-        if (pid == 0)
+        if (id == 0)
             printf("Too many processes.\n");
         MPI_Finalize();
         exit(1);
@@ -146,7 +146,7 @@ low_value = 2 + BLOCK_LOW(pid, psize, n-1);
     marked = (char*) malloc(size);
     if (marked == NULL)
     {
-        printf("PID: %d - Cannot allocate enough memory.\n", pid);
+        printf("id: %d - Cannot allocate enough memory.\n", id);
         MPI_Finalize();
         exit(1);
     }
@@ -156,7 +156,7 @@ low_value = 2 + BLOCK_LOW(pid, psize, n-1);
     /**
      * Core Function
      */
-    if (pid == 0)
+    if (id == 0)
         index = 0;
     prime = 3;
     
@@ -173,21 +173,21 @@ low_value = 2 + BLOCK_LOW(pid, psize, n-1);
         }
         for (i = first; i < size; i += prime)
             marked[i] = 1;
-        if (pid == 0)
+        if (id == 0)
         {
             while(marked[++index] == 1);
             prime = 3 + index * 2;
         }
-        if (psize > 1)
+        if (p > 1)
             MPI_Bcast(&prime, 1, MPI_INT, 0, MPI_COMM_WORLD);
     } while (prime * prime <= n);
     count = 0;
     for (i = 0; i < size; i++)
         if (marked[i] == 0)
             count++;
-    if (pid == 0)
+    if (id == 0)
         count++;    // 2
-    if (psize > 1)
+    if (p > 1)
         MPI_Reduce(&count, &global_count, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
     
 
