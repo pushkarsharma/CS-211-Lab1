@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
    do
    {
       if (prime * prime > low_value)
-         first = prime * prime - low_value;
+         first = (prime * prime - low_value) / 2;
       else
       {
          if (!(low_value % prime))
@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
 
    if (!id)
    {
-      printf("The total number of prime: %ld, total time: %10.6f, total node %d\n", global_count+1, elapsed_time, p);
+      printf("The total number of prime: %ld, total time: %10.6f, total node %d\n", global_count + 1, elapsed_time, p);
    }
    MPI_Finalize();
    return 0;
