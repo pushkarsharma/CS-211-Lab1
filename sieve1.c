@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
    n = (int)(n - 2) / 2;
    low_value = ((id * n / p) * 2) + 3;
    high_value = ((((id + 1) * n / p) - 1) * 2) + 3;
-   size = high_value - low_value + 1;
+   size = (high_value - low_value) / 2 + 1;
 
    /* Bail out if all the primes used for sieving are
        not all held by process 0 */
@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
          if (!(low_value % prime))
             first = 0;
          else
-            first = (prime - (low_value % prime)) / 2;     
+            first = (prime - (low_value % prime)) / 2;
       }
       for (i = first; i < size; i += prime)
          marked[i] = 1;
