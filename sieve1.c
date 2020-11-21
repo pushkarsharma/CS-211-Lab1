@@ -3,8 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define BLOCK_LOW(id, p, n) ((id) * (n) / (p))
-#define BLOCK_HIGH(id, p, n) (((id + 1) * (n) / (p)) - 1)
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
 int main(int argc, char *argv[])
@@ -52,9 +50,8 @@ int main(int argc, char *argv[])
    high_value = high_value - (high_value + 1) % 2;
    size = (high_value - low_value) / 2 + 1;
 
-   /**
-     * process 0 must holds all primes used
-     */
+   /* Bail out if all the primes used for sieving are
+      not all held by process 0 */
    proc0_size = (n / 2 - 1) / p;
    if ((2 + proc0_size) < (int)sqrt((double)n / 2))
    {
@@ -64,9 +61,7 @@ int main(int argc, char *argv[])
       exit(1);
    }
 
-   /**
-     * Allocation
-     */
+   /* Allocate this process's share of the array. */
    marked = (char *)malloc(size);
    if (marked == NULL)
    {
@@ -77,30 +72,36 @@ int main(int argc, char *argv[])
    for (i = 0; i < size; i++)
       marked[i] = 0;
 
-   /**
-     * Core Function
-     */
    if (id == 0)
       index = 0;
    prime = 3;
 
    do
    {
+      /*We start checking here where to start the marking.*/
       if (prime * prime > low_value)
          first = (prime * prime - low_value) / 2;
       else
       {
+         /*Find the offset in the array as in how far we are from
+           the next multiple of the current seiving prime number.*/
          if ((low_value % prime) == 0)
             first = 0;
          else
             first = (prime - (low_value % prime) + low_value / prime % 2 * prime) / 2;
       }
+      /*Mark the multiples of the seiving prime.*/
       for (i = first; i < size; i += prime)
          marked[i] = 1;
       if (id == 0)
       {
+         /*Find the next seiving prime number by finding the next
+           un-marked number.*/
          while (marked[++index] == 1)
             ;
+            /*The mapping of the index and value is 3+(index)*2. So, we
+              calculate the next prime value with the next un-marked
+              index.*/
          prime = 3 + index * 2;
       }
       if (p > 1)
