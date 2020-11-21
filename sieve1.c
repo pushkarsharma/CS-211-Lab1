@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 #define BLOCK_LOW(id, p, n) ((id) * (n) / (p))
-#define BLOCK_HIGH(id, p, n) (BLOCK_LOW((id)+1, p, n) - 1)
+#define BLOCK_HIGH(id, p, n) (((id + 1) * (n) / (p)) - 1)
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
 int main(int argc, char *argv[])
@@ -46,156 +46,74 @@ int main(int argc, char *argv[])
    /* Stop the timer */
 
    /* Add you code here  */
-   // low_value = 2 + (id * (n - 1) / p);
-   // low_value = low_value + (low_value + 1) % 2;
-   // high_value = 2 + ((id + 1) * (n - 1) / p);
-   // high_value = high_value - (high_value + 1) % 2;
-   // size = (high_value - low_value) / 2 + 1;
+   low_value = 2 + ((id) * (n - 1) / (p));
+   high_value = 2 + (((id + 1) * (n - 1) / (p)) - 1);
+   low_value = low_value + (low_value + 1) % 2;
+   high_value = high_value - (high_value + 1) % 2;
+   size = (high_value - low_value) / 2 + 1;
 
-   // /* Bail out if all the primes used for sieving are
-   //     not all held by process 0 */
-   // proc0_size = (n / 2 - 1) / p;
-
-   // if ((2 + proc0_size) < (int)sqrt((double)n / 2))
-   // {
-   //    if (!id)
-   //       printf("Too many processes.\n");
-   //    MPI_Finalize();
-   //    exit(1);
-   // }
-
-   // /* Allocate this process's share of the array. */
-   // marked = (char *)malloc(size);
-   // if (marked == NULL)
-   // {
-   //    printf("id: %d - Cannot allocate enough memory.\n", id);
-   //    MPI_Finalize();
-   //    exit(1);
-   // }
-   // for (i = 0; i < size; i++)
-   //    marked[i] = 0;
-
-   // if (!id)
-   //    index = 0;
-   // prime = 3;
-
-   // do
-   // {
-   //    /*We start checking here where to start the marking.*/
-   //    if (prime * prime > low_value)
-   //       first = (prime * prime - low_value) / 2;
-   //    else
-   //    {
-   //       /*Find the offset in the array as in how far we are from
-   //         the next multiple of the current seiving prime number.*/
-   //       if (!(low_value % prime))
-   //          first = 0;
-   //       else
-   //          first = (prime - (low_value % prime) + low_value / prime % 2 * prime) / 2;
-   //    }
-   //    /*Mark the multiples of the seiving prime.*/
-   //    for (i = first; i < size; i += prime)
-   //       marked[i] = 1;
-   //    if (!id)
-   //    {
-   //       /*Find the next seiving prime number by finding the next
-   //         un-marked number.*/
-   //       while (marked[++index] == 1)
-   //          ;
-   //       /*The mapping of the index and value is 3+(index)*2. So, we
-   //         calculate the next prime value with the next un-marked
-   //         index.*/
-   //       prime = 3 + index * 2;
-   //    }
-   //    if (p > 1)
-   //       MPI_Bcast(&prime, 1, MPI_INT, 0, MPI_COMM_WORLD);
-   // } while (prime * prime <= n);
-   // count = 0;
-   // for (i = 0; i < size; i++)
-   //    if (!marked[i])
-   //       count++;
-   // if (!id)
-   //    count++;
-   // if (p > 1)
-   //    MPI_Reduce(&count, &global_count, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-
-
-
-
-    low_value = 2 + BLOCK_LOW(id, p, n - 1);
-    high_value = 2 + BLOCK_HIGH(id, p, n - 1);
-    // size = BLOCK_SIZE(id, p, n-1);
-    low_value = low_value + (low_value + 1) % 2;
-    high_value = high_value - (high_value + 1) % 2;
-    size = (high_value - low_value) / 2 + 1;
-
-    /**
+   /**
      * process 0 must holds all primes used
      */
-    proc0_size = (n / 2 - 1) / p;
-    if ((2 + proc0_size) < (int)sqrt((double)n / 2))
-    {
-        if (id == 0)
-            printf("Too many processes.\n");
-        MPI_Finalize();
-        exit(1);
-    }
+   proc0_size = (n / 2 - 1) / p;
+   if ((2 + proc0_size) < (int)sqrt((double)n / 2))
+   {
+      if (id == 0)
+         printf("Too many processes.\n");
+      MPI_Finalize();
+      exit(1);
+   }
 
-    /**
+   /**
      * Allocation
      */
-    marked = (char *)malloc(size);
-    if (marked == NULL)
-    {
-        printf("id: %d - Cannot allocate enough memory.\n", id);
-        MPI_Finalize();
-        exit(1);
-    }
-    for (i = 0; i < size; i++)
-        marked[i] = 0;
+   marked = (char *)malloc(size);
+   if (marked == NULL)
+   {
+      printf("id: %d - Cannot allocate enough memory.\n", id);
+      MPI_Finalize();
+      exit(1);
+   }
+   for (i = 0; i < size; i++)
+      marked[i] = 0;
 
-    /**
+   /**
      * Core Function
      */
-    if (id == 0)
-        index = 0;
-    prime = 3;
+   if (id == 0)
+      index = 0;
+   prime = 3;
 
-    do
-    {
-        if (prime * prime > low_value)
-            first = (prime * prime - low_value) / 2;
-        else
-        {
-            if ((low_value % prime) == 0)
-                first = 0;
-            else
-                first = (prime - (low_value % prime) + low_value / prime % 2 * prime) / 2;
-        }
-        for (i = first; i < size; i += prime)
-            marked[i] = 1;
-        if (id == 0)
-        {
-            while (marked[++index] == 1)
-                ;
-            prime = 3 + index * 2;
-        }
-        if (p > 1)
-            MPI_Bcast(&prime, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    } while (prime * prime <= n);
-    count = 0;
-    for (i = 0; i < size; i++)
-        if (marked[i] == 0)
-            count++;
-    if (id == 0)
-        count++; // 2
-    if (p > 1)
-        MPI_Reduce(&count, &global_count, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-
-
-
-
-
+   do
+   {
+      if (prime * prime > low_value)
+         first = (prime * prime - low_value) / 2;
+      else
+      {
+         if ((low_value % prime) == 0)
+            first = 0;
+         else
+            first = (prime - (low_value % prime) + low_value / prime % 2 * prime) / 2;
+      }
+      for (i = first; i < size; i += prime)
+         marked[i] = 1;
+      if (id == 0)
+      {
+         while (marked[++index] == 1)
+            ;
+         prime = 3 + index * 2;
+      }
+      if (p > 1)
+         MPI_Bcast(&prime, 1, MPI_INT, 0, MPI_COMM_WORLD);
+   } while (prime * prime <= n);
+   count = 0;
+   for (i = 0; i < size; i++)
+      if (marked[i] == 0)
+         count++;
+   if (id == 0)
+      count++; // 2
+   if (p > 1)
+      MPI_Reduce(&count, &global_count, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
 
    elapsed_time += MPI_Wtime();
 
@@ -203,7 +121,7 @@ int main(int argc, char *argv[])
 
    if (!id)
    {
-      printf("The total number of prime: %ld, total time: %10.6f, total node %d\n", global_count + 1, elapsed_time, p);
+      printf("The total number of prime: %ld, total time: %10.6f, total node %d\n", global_count, elapsed_time, p);
    }
    MPI_Finalize();
    return 0;
