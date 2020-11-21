@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
    proc0_size = (n / 2 - 1) / p;
    if ((2 + proc0_size) < (int)sqrt((double)n / 2))
    {
-      if (id == 0)
+      if (!id)
          printf("Too many processes.\n");
       MPI_Finalize();
       exit(1);
@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
    for (i = 0; i < size; i++)
       marked[i] = 0;
 
-   if (id == 0)
+   if (!id)
       index = 0;
    prime = 3;
 
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
       {
          /*Find the offset in the array as in how far we are from
            the next multiple of the current seiving prime number.*/
-         if ((low_value % prime) == 0)
+         if (!(low_value % prime))
             first = 0;
          else
             first = (prime - (low_value % prime) + low_value / prime % 2 * prime) / 2;
@@ -93,13 +93,13 @@ int main(int argc, char *argv[])
       /*Mark the multiples of the seiving prime.*/
       for (i = first; i < size; i += prime)
          marked[i] = 1;
-      if (id == 0)
+      if (!id)
       {
          /*Find the next seiving prime number by finding the next
            un-marked number.*/
          while (marked[++index] == 1)
             ;
-            /*The mapping of the index and value is 3+(index)*2. So, we
+         /*The mapping of the index and value is 3+(index)*2. So, we
               calculate the next prime value with the next un-marked
               index.*/
          prime = 3 + index * 2;
@@ -109,10 +109,10 @@ int main(int argc, char *argv[])
    } while (prime * prime <= n);
    count = 0;
    for (i = 0; i < size; i++)
-      if (marked[i] == 0)
+      if (!marked[i])
          count++;
-   if (id == 0)
-      count++; // 2
+   if (!id)
+      count++;
    if (p > 1)
       MPI_Reduce(&count, &global_count, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
 
