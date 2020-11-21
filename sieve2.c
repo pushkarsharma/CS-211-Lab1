@@ -33,6 +33,7 @@ int main(int argc, char *argv[])
    unsigned long int local_prime; /* Current prime */
    unsigned long int size;        /* Elements in 'marked' */
    unsigned long int local_prime_size;
+   unsigned long int local_size;
 
    MPI_Init(&argc, &argv);
 
@@ -63,7 +64,7 @@ int main(int argc, char *argv[])
    low_value = low_value + (low_value + 1) % 2;
    high_value = high_value - (high_value + 1) % 2;
    size = (high_value - low_value) / 2 + 1;
-   local_size = (int)sqrt((double)(n)) - 1;
+   local_size = (int)sqrt(n) - 1;
 
    /* Bail out if all the primes used for sieving are
       not all held by process 0 */
