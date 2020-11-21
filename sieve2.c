@@ -34,6 +34,7 @@ int main(int argc, char *argv[])
    unsigned long int size;        /* Elements in 'marked' */
    unsigned long int local_prime_size;
    unsigned long int local_size;
+   char *local_marked;
 
    MPI_Init(&argc, &argv);
 
