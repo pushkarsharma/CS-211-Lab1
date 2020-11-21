@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
    marked = (char *)malloc(size);
    if (marked == NULL)
    {
-      printf("id: %d - Cannot allocate enough memory.\n", id);
+      printf("Cannot allocate enough memory.\n");
       MPI_Finalize();
       exit(1);
    }
