@@ -2,10 +2,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#define BLOCK_LOW(id, p, n) ((id) * (n) / (p))
-#define BLOCK_HIGH(id, p, n) (BLOCK_LOW((id)+1, p, n) - 1)
-#define BLOCK_SIZE(id, p, n) (BLOCK_LOW((id)+1, p, n) - BLOCK_LOW((id), p, n))
-#define BLOCK_OWNER(index, p, n) ((((p) * (index) + 1) - 1) / (n))
+
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
 int main(int argc, char *argv[])
@@ -47,59 +44,66 @@ int main(int argc, char *argv[])
    /* Stop the timer */
 
    /* Add you code here  */
-
-   n = (int)(n - 2) / 2;
-   low_value = ((id * n / p) * 2) + 3;
-   high_value = ((((id + 1) * n / p) - 1) * 2) + 3;
+   low_value = 2 + (id * (n - 1) / p);
+   low_value = low_value + (low_value + 1) % 2;
+   high_value = 2 + ((id + 1) * (n - 1) / p);
+   high_value = high_value - (high_value + 1) % 2;
    size = (high_value - low_value) / 2 + 1;
 
    /* Bail out if all the primes used for sieving are
        not all held by process 0 */
+   proc0_size = (n / 2 - 1) / p;
 
-   proc0_size = n / p;
-
-   if ((2 + proc0_size) < (int)sqrt((double)n))
+   if ((2 + proc0_size) < (int)sqrt((double)n / 2))
    {
       if (!id)
-         printf("Too many processes\n");
+         printf("Too many processes.\n");
       MPI_Finalize();
       exit(1);
    }
 
    /* Allocate this process's share of the array. */
-
    marked = (char *)malloc(size);
-
    if (marked == NULL)
    {
-      printf("Cannot allocate enough memory\n");
+      printf("id: %d - Cannot allocate enough memory.\n", id);
       MPI_Finalize();
       exit(1);
    }
-
    for (i = 0; i < size; i++)
       marked[i] = 0;
+
    if (!id)
       index = 0;
    prime = 3;
+
    do
    {
+      /*We start checking here where to start the marking.*/
       if (prime * prime > low_value)
          first = (prime * prime - low_value) / 2;
       else
       {
+         /*Find the offset in the array as in how far we are from
+           the next multiple of the current seiving prime number.*/
          if (!(low_value % prime))
             first = 0;
          else
-            first = (2*prime - (low_value % prime)) / 2;
+            first = (prime - (low_value % prime) + low_value / prime % 2 * prime) / 2;
       }
+      /*Mark the multiples of the seiving prime.*/
       for (i = first; i < size; i += prime)
          marked[i] = 1;
       if (!id)
       {
-         while (marked[++index])
+         /*Find the next seiving prime number by finding the next
+           un-marked number.*/
+         while (marked[++index] == 1)
             ;
-         prime = (index * 2) + 3;
+         /*The mapping of the index and value is 3+(index)*2. So, we
+           calculate the next prime value with the next un-marked
+           index.*/
+         prime = 3 + index * 2;
       }
       if (p > 1)
          MPI_Bcast(&prime, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -108,9 +112,10 @@ int main(int argc, char *argv[])
    for (i = 0; i < size; i++)
       if (!marked[i])
          count++;
+   if (!id)
+      count++;
    if (p > 1)
-      MPI_Reduce(&count, &global_count, 1, MPI_INT, MPI_SUM,
-                 0, MPI_COMM_WORLD);
+      MPI_Reduce(&count, &global_count, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
 
    elapsed_time += MPI_Wtime();
 
