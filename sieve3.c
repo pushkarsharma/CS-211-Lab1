@@ -62,10 +62,6 @@ int main(int argc, char *argv[])
       well as the integers represented by the first and
       last array elements */
 
-   /* Stop the timer */
-
-   elapsed_time += MPI_Wtime();
-
    /* Add you code here  */
    low_value = 2 + ((id) * (n - 1) / (p));
    high_value = 2 + (((id + 1) * (n - 1) / (p)) - 1);
@@ -155,6 +151,9 @@ int main(int argc, char *argv[])
       count++;
    if (p > 1)
       MPI_Reduce(&count, &global_count, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+
+   /* Stop the timer */
+   elapsed_time += MPI_Wtime();
 
    /* Print the results */
 
